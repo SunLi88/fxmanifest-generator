@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>fxmanifest.lua Generator for FiveM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code&display=swap');
+  
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    background: linear-gradient(135deg, #1e1e2f, #121212);
+    color: #ddd;
+    font-family: 'Fira Code', monospace, monospace;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container {
+    max-width: 900px;
+    width: 100%;
+    background: #222233;
+    padding: 25px 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 30px #0008;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  header img {
+    max-width: 120px;
+    margin-bottom: 10px;
+  }
+  header h1 {
+    margin: 0;
+    font-weight: 700;
+    font-size: 2rem;
+    color: #70c0f5;
+    text-shadow: 0 0 5px #70c0f5aa;
+  }
+  header p {
+    color: #a0a0b0;
+    font-style: italic;
+    margin-top: 5px;
+    font-size: 0.9rem;
+  }
+  label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #8ab4f8;
+  }
+  textarea {
+    width: 100%;
+    height: 280px;
+    background: #1a1a2e;
+    border: 2px solid #394a83;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'Fira Code', monospace;
+    font-size: 1rem;
+    color: #cbd5f5;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: #70c0f5;
+    background: #1e1e3c;
+  }
+  button {
+    background: #5271ff;
+    border: none;
+    padding: 14px 30px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px #5271ffaa;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+  button:hover {
+    background: #3355ff;
+    box-shadow: 0 6px 22px #3355ffaa;
+  }
+  .btn-group {
+    margin: 18px 0 30px;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  h2, h3 {
+    text-align: center;
+    font-weight: 700;
+    color: #80aaff;
+    text-shadow: 0 0 7px #80aaff66;
+  }
+  @media (max-width: 600px) {
+    textarea {
+      height: 200px;
+    }
+    button {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <!-- Change this URL for your own logo or image -->
+      <img src="https://cdn-icons-png.flaticon.com/512/873/873120.png" alt="fxmanifest Icon" />
+      <h1>fxmanifest.lua Generator</h1>
+      <p>For your FiveM mods and maps</p>
+    </header>
+    
+    <label for="input">Paste your file list (.ytd, .ydr, .ytyp, .ymap):</label>
+    <textarea id="input" placeholder="Example: rdd_main.ymap&#10;rdd_main.ytyp&#10;rdd_big_rocks.ybn"></textarea>
+    
+    <div class="btn-group">
+      <button onclick="generar()">Generate fxmanifest.lua</button>
+      <button onclick="clearInput()">Clear Input</button>
+      <button onclick="clearOutput()">Clear Output</button>
+	        <button onclick="descargar()">Download fxmanifest.lua</button>
+    </div>
+    
+    <h3>Result:</h3>
+    <textarea id="output" readonly placeholder="Your generated fxmanifest will appear here..."></textarea>
+  </div>
+
+<script>
+function generar() {
+    const lines = document.getElementById('input').value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+    let filesBlock = [];
+    let dataFiles = [];
+
+    lines.forEach(file => {
+        filesBlock.push(`    'stream/${file}',`);
+        if (file.endsWith('.ytyp')) {
+            dataFiles.push(`data_file 'DLC_ITYP_REQUEST' 'stream/${file}'`);
+        }
+    });
+
+    const fxmanifest = 
+`fx_version 'cerulean'
+game 'gta5'
+lua54 'yes'
+
+this_is_a_map 'yes'
+
+files {
+${filesBlock.join('\n')}
+}
+
+${dataFiles.join('\n')}
+`;
+
+    document.getElementById('output').value = fxmanifest;
+}
+
+function descargar() {
+    const contenido = document.getElementById('output').value;
+    if (!contenido.trim()) {
+      alert('Please generate the fxmanifest first.');
+      return;
+    }
+    const blob = new Blob([contenido], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'fxmanifest.lua';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function clearInput() {
+  document.getElementById('input').value = '';
+}
+
+function clearOutput() {
+  document.getElementById('output').value = '';
+}
+</script>
+</body>
+</html>
